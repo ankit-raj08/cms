@@ -1,0 +1,51 @@
+{
+  "name": "@repo/project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "@repo/project description",
+  "author": "Nisharg Shah <nishargshah3101@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean:all": "pnpm clean:node_modules && pnpm clean:generated-folders",
+    "clean:dist": "pnpx rimraf dist && pnpm -r exec pnpx rimraf dist",
+    "clean:generated-folders": "pnpm clean:dist && pnpm clean:next",
+    "clean:next": "pnpx rimraf .next && pnpm -r exec pnpx rimraf .next",
+    "clean:node_modules": "pnpx rimraf node_modules && pnpm -r exec pnpx rimraf node_modules",
+    "clean:workspace": "pnpm clean:node_modules && pnpx rimraf pnpm-lock.yaml",
+    "format": "pnpm root:format && pnpm -r format",
+    "format:fix": "pnpm root:format:fix && pnpm -r format:fix",
+    "fresh:init": "pnpm clean:workspace && pnpm clean:generated-folders",
+    "lint": "pnpm root:lint && pnpm -r lint",
+    "lint:fix": "pnpm root:lint:fix && pnpm -r lint:fix",
+    "prepare": "husky || true",
+    "root:format": "prettier . --check --log-level silent",
+    "root:format:fix": "prettier . --write --log-level silent",
+    "root:lint": "eslint .",
+    "root:lint:fix": "eslint . --fix",
+    "script:lint": "bash -e ./scripts/lint.sh",
+    "typecheck": "pnpm -r typecheck",
+    "web:dev": "pnpm --filter @repo/web dev"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/lint-staged-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@types/node": "^24.10.13",
+    "eslint": "^9.39.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "prettier-plugin-packagejson": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tsc-files": "^1.1.4",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.30.2",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": "please-use-pnpm",
+    "pnpm": ">=10.26.0",
+    "yarn": "please-use-pnpm"
+  }
+}

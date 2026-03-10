@@ -1,0 +1,14 @@
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --animate-loader: loader 1s linear infinite;
+  --color-background: #fff;
+  --color-foreground: #000;
+  --color-muted-foreground: #6b7280;
+}
+
+html[data-theme='dark'] {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --color-muted-foreground: #a1a1aa;
+}
