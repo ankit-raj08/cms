@@ -14,17 +14,16 @@ export const Roles: CollectionConfig = {
       type: 'group',
       fields: [
         {
-          name: 'content',
+          name: 'pages',
           type: 'group',
           fields: [
             { name: 'read', type: 'checkbox' },
-            { name: 'create', type: 'checkbox' },
             { name: 'update', type: 'checkbox' },
-            { name: 'delete', type: 'checkbox' },
+            { name: 'publish', type: 'checkbox' },
           ],
         },
         {
-          name: 'contentTypes',
+          name: 'blogs',
           type: 'group',
           fields: [
             { name: 'read', type: 'checkbox' },
@@ -40,14 +39,6 @@ export const Roles: CollectionConfig = {
             { name: 'read', type: 'checkbox' },
             { name: 'upload', type: 'checkbox' },
             { name: 'delete', type: 'checkbox' },
-          ],
-        },
-        {
-          name: 'projects',
-          type: 'group',
-          fields: [
-            { name: 'read', type: 'checkbox' },
-            { name: 'update', type: 'checkbox' },
           ],
         },
       ],

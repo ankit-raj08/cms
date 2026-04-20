@@ -1,12 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  buildActiveProjectReadAccess,
   buildProjectScopedCreateAccess,
-  buildProjectScopedReadAccess,
   buildProjectScopedUpdateDeleteAccess,
   enforceProjectAccessOnCreate,
   hideCollectionWithoutReadPermission,
 } from '@/utils/access/rbac'
+import { attachProject } from '@/hooks/attachProject'
 
 export const FAQs: CollectionConfig = {
   slug: 'faqs',
@@ -14,13 +15,13 @@ export const FAQs: CollectionConfig = {
     hidden: hideCollectionWithoutReadPermission('content'),
   },
   access: {
-    read: buildProjectScopedReadAccess('content', 'project'),
+    read: buildActiveProjectReadAccess(),
     create: buildProjectScopedCreateAccess('content'),
     update: buildProjectScopedUpdateDeleteAccess('content', 'update', 'project'),
     delete: buildProjectScopedUpdateDeleteAccess('content', 'delete', 'project'),
   },
   hooks: {
-    beforeChange: [enforceProjectAccessOnCreate('content')],
+    beforeChange: [attachProject, enforceProjectAccessOnCreate('content')],
   },
   fields: [
     {
@@ -38,6 +39,7 @@ export const FAQs: CollectionConfig = {
       type: 'relationship',
       relationTo: 'projects',
       required: true,
+      index: true,
     },
   ],
 }

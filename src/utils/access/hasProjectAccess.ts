@@ -4,10 +4,12 @@ type IDLike = string | number
 
 type ProjectRole = {
   project?: IDLike | { id?: IDLike | null } | null
+  role?: unknown
 }
 
 type AccessUser = {
   globalRole?: string | null
+  projectAccess?: ProjectRole[] | null
   projectRoles?: ProjectRole[] | null
 }
 
@@ -21,9 +23,10 @@ const normalizeId = (value: unknown): string | null => {
 }
 
 export const getUserProjectIds = (user: AccessUser | null | undefined): string[] => {
-  if (!user?.projectRoles?.length) return []
+  const assignments = user?.projectAccess?.length ? user.projectAccess : user?.projectRoles
+  if (!assignments?.length) return []
 
-  const projectIds = user.projectRoles
+  const projectIds = assignments
     .map((item) => normalizeId(item?.project))
     .filter((projectId): projectId is string => Boolean(projectId))
 

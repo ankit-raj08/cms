@@ -72,9 +72,7 @@ export interface Config {
     projects: Project;
     media: Media;
     pages: Page;
-    posts: Post;
-    categories: Category;
-    authors: Author;
+    blogs: Blog;
     faqs: Faq;
     testimonials: Testimonial;
     'payload-kv': PayloadKv;
@@ -89,9 +87,7 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    blogs: BlogsSelect<false> | BlogsSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -147,10 +143,11 @@ export interface User {
   id: number;
   name?: string | null;
   globalRole: 'super_admin' | 'user';
-  projectRoles?:
+  projectAccess?:
     | {
         project: number | Project;
         role: number | Role;
+        allowedPages?: (number | Page)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -193,13 +190,12 @@ export interface Role {
   id: number;
   name: string;
   permissions?: {
-    content?: {
+    pages?: {
       read?: boolean | null;
-      create?: boolean | null;
       update?: boolean | null;
-      delete?: boolean | null;
+      publish?: boolean | null;
     };
-    contentTypes?: {
+    blogs?: {
       read?: boolean | null;
       create?: boolean | null;
       update?: boolean | null;
@@ -210,11 +206,97 @@ export interface Role {
       upload?: boolean | null;
       delete?: boolean | null;
     };
-    projects?: {
-      read?: boolean | null;
-      update?: boolean | null;
-    };
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  project: number | Project;
+  /**
+   * Drag and drop sections to control page layout order.
+   */
+  sections?:
+    | (
+        | {
+            order?: number | null;
+            title: string;
+            subtitle?: string | null;
+            image?: (number | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            order?: number | null;
+            title?: string | null;
+            limit?: number | null;
+            filters?: {
+              tag?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blog-list';
+          }
+        | {
+            title?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq-section';
+          }
+        | {
+            order?: number | null;
+            heading?: string | null;
+            headingType?: ('h1' | 'h2' | 'h3') | null;
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text-section';
+          }
+        | {
+            order?: number | null;
+            title?: string | null;
+            points?:
+              | {
+                  point?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'bullet-section';
+          }
+        | {
+            order?: number | null;
+            quote?: string | null;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'quote-section';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -240,144 +322,40 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
+ * via the `definition` "blogs".
  */
-export interface Page {
+export interface Blog {
   id: number;
-  title: string;
-  slug: string;
-  project: number | Project;
-  sections?:
-    | (
-        | {
-            title: string;
-            subtitle?: string | null;
-            backgroundImage?: (number | null) | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'hero';
-          }
-        | {
-            content: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            image: number | Media;
-            alt?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'image';
-          }
-        | {
-            title?: string | null;
-            cards: {
-              title: string;
-              description?: string | null;
-              image?: (number | null) | Media;
-              id?: string | null;
-            }[];
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'card-list';
-          }
-        | {
-            title: string;
-            description?: string | null;
-            buttonText: string;
-            buttonLink: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  title: string;
-  slug: string;
+  title?: string | null;
+  slug?: string | null;
   project: number | Project;
   featuredImage?: (number | null) | Media;
-  category?: (number | null) | Category;
-  author?: (number | null) | Author;
-  sections?:
+  excerpt?: string | null;
+  content?:
     | (
         | {
-            title: string;
-            subtitle?: string | null;
-            backgroundImage?: (number | null) | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'hero';
-          }
-        | {
-            content: string;
+            content?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
           }
         | {
-            image: number | Media;
+            image?: (number | null) | Media;
             alt?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'image';
           }
-        | {
-            title?: string | null;
-            cards: {
-              title: string;
-              description?: string | null;
-              image?: (number | null) | Media;
-              id?: string | null;
-            }[];
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'card-list';
-          }
-        | {
-            title: string;
-            description?: string | null;
-            buttonText: string;
-            buttonLink: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
       )[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  project: number | Project;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "authors".
- */
-export interface Author {
-  id: number;
-  name: string;
-  bio?: string | null;
-  project: number | Project;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('draft' | 'published') | null;
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -400,7 +378,9 @@ export interface Faq {
 export interface Testimonial {
   id: number;
   name: string;
-  quote: string;
+  message: string;
+  designation?: string | null;
+  image?: (number | null) | Media;
   project: number | Project;
   updatedAt: string;
   createdAt: string;
@@ -450,16 +430,8 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: number | Post;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: number | Category;
-      } | null)
-    | ({
-        relationTo: 'authors';
-        value: number | Author;
+        relationTo: 'blogs';
+        value: number | Blog;
       } | null)
     | ({
         relationTo: 'faqs';
@@ -518,11 +490,12 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   globalRole?: T;
-  projectRoles?:
+  projectAccess?:
     | T
     | {
         project?: T;
         role?: T;
+        allowedPages?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -551,15 +524,14 @@ export interface RolesSelect<T extends boolean = true> {
   permissions?:
     | T
     | {
-        content?:
+        pages?:
           | T
           | {
               read?: T;
-              create?: T;
               update?: T;
-              delete?: T;
+              publish?: T;
             };
-        contentTypes?:
+        blogs?:
           | T
           | {
               read?: T;
@@ -573,12 +545,6 @@ export interface RolesSelect<T extends boolean = true> {
               read?: T;
               upload?: T;
               delete?: T;
-            };
-        projects?:
-          | T
-          | {
-              read?: T;
-              update?: T;
             };
       };
   updatedAt?: T;
@@ -628,49 +594,65 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              order?: T;
               title?: T;
               subtitle?: T;
-              backgroundImage?: T;
+              image?: T;
               id?: T;
               blockName?: T;
             };
-        text?:
+        'blog-list'?:
           | T
           | {
+              order?: T;
+              title?: T;
+              limit?: T;
+              filters?:
+                | T
+                | {
+                    tag?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'faq-section'?:
+          | T
+          | {
+              title?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'text-section'?:
+          | T
+          | {
+              order?: T;
+              heading?: T;
+              headingType?: T;
               content?: T;
               id?: T;
               blockName?: T;
             };
-        image?:
+        'bullet-section'?:
           | T
           | {
-              image?: T;
-              alt?: T;
-              id?: T;
-              blockName?: T;
-            };
-        'card-list'?:
-          | T
-          | {
+              order?: T;
               title?: T;
-              cards?:
+              points?:
                 | T
                 | {
-                    title?: T;
-                    description?: T;
-                    image?: T;
+                    point?: T;
                     id?: T;
                   };
               id?: T;
               blockName?: T;
             };
-        cta?:
+        'quote-section'?:
           | T
           | {
-              title?: T;
-              description?: T;
-              buttonText?: T;
-              buttonLink?: T;
+              order?: T;
+              quote?: T;
+              author?: T;
               id?: T;
               blockName?: T;
             };
@@ -680,27 +662,17 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "blogs_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface BlogsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   project?: T;
   featuredImage?: T;
-  category?: T;
-  author?: T;
-  sections?:
+  excerpt?: T;
+  content?:
     | T
     | {
-        hero?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              backgroundImage?: T;
-              id?: T;
-              blockName?: T;
-            };
         text?:
           | T
           | {
@@ -716,54 +688,15 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'card-list'?:
-          | T
-          | {
-              title?: T;
-              cards?:
-                | T
-                | {
-                    title?: T;
-                    description?: T;
-                    image?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        cta?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              buttonText?: T;
-              buttonLink?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  project?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "authors_select".
- */
-export interface AuthorsSelect<T extends boolean = true> {
-  name?: T;
-  bio?: T;
-  project?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  status?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -784,7 +717,9 @@ export interface FaqsSelect<T extends boolean = true> {
  */
 export interface TestimonialsSelect<T extends boolean = true> {
   name?: T;
-  quote?: T;
+  message?: T;
+  designation?: T;
+  image?: T;
   project?: T;
   updatedAt?: T;
   createdAt?: T;

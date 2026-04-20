@@ -7,8 +7,8 @@ type IDLike = string | number
 type PermissionActionMap = Record<string, boolean | null | undefined>
 
 type StructuredPermissions = {
-  content?: PermissionActionMap | null
-  contentTypes?: PermissionActionMap | null
+  pages?: PermissionActionMap | null
+  blogs?: PermissionActionMap | null
   media?: PermissionActionMap | null
   projects?: PermissionActionMap | null
 }
@@ -26,15 +26,20 @@ type ProjectRole = {
   role?: RoleValue
 }
 
-type AccessUser = {
+export type AccessUser = {
   globalRole?: string | null
-  projectRoles?: ProjectRole[] | null
+  projectAccess?: ProjectRole[] | null
 }
 
 const resolveRolePermissionsSync = (role: RoleValue): StructuredPermissions | null => {
   if (!role || typeof role !== 'object') return null
   if (!role.permissions || typeof role.permissions !== 'object') return null
   return role.permissions
+}
+
+const getUserProjectAssignments = (user: AccessUser): ProjectRole[] => {
+  if (user.projectAccess?.length) return user.projectAccess
+  return []
 }
 
 const normalizeId = (value: unknown): string | null => {
@@ -87,9 +92,10 @@ export const hasPermission = async (
   if (!hasProjectAccess(user, projectId)) return false
 
   const normalizedProjectId = normalizeId(projectId)
-  if (!normalizedProjectId || !user.projectRoles?.length) return false
+  const assignments = getUserProjectAssignments(user)
+  if (!normalizedProjectId || !assignments.length) return false
 
-  const matchingProjectRole = user.projectRoles.find((projectRole) => {
+  const matchingProjectRole = assignments.find((projectRole) => {
     return normalizeId(projectRole?.project) === normalizedProjectId
   })
 
@@ -111,9 +117,10 @@ export const hasAnyPermission = (
 ): boolean => {
   if (!user) return false
   if (user.globalRole === 'super_admin') return true
-  if (!user.projectRoles?.length) return false
+  const assignments = getUserProjectAssignments(user)
+  if (!assignments.length) return false
 
-  return user.projectRoles.some((projectRole) => {
+  return assignments.some((projectRole) => {
     const permissions = resolveRolePermissionsSync(projectRole.role ?? null)
     if (!permissions) return false
 

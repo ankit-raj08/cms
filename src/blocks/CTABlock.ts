@@ -4,6 +4,10 @@ export const CTABlock: Block = {
   slug: 'cta',
   fields: [
     {
+      name: 'order',
+      type: 'number',
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,

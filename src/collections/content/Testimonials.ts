@@ -1,12 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  buildActiveProjectReadAccess,
   buildProjectScopedCreateAccess,
-  buildProjectScopedReadAccess,
   buildProjectScopedUpdateDeleteAccess,
   enforceProjectAccessOnCreate,
   hideCollectionWithoutReadPermission,
 } from '@/utils/access/rbac'
+import { attachProject } from '@/hooks/attachProject'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -14,13 +15,13 @@ export const Testimonials: CollectionConfig = {
     hidden: hideCollectionWithoutReadPermission('content'),
   },
   access: {
-    read: buildProjectScopedReadAccess('content', 'project'),
+    read: buildActiveProjectReadAccess(),
     create: buildProjectScopedCreateAccess('content'),
     update: buildProjectScopedUpdateDeleteAccess('content', 'update', 'project'),
     delete: buildProjectScopedUpdateDeleteAccess('content', 'delete', 'project'),
   },
   hooks: {
-    beforeChange: [enforceProjectAccessOnCreate('content')],
+    beforeChange: [attachProject, enforceProjectAccessOnCreate('content')],
   },
   fields: [
     {
@@ -29,15 +30,25 @@ export const Testimonials: CollectionConfig = {
       required: true,
     },
     {
-      name: 'quote',
+      name: 'message',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'designation',
+      type: 'text',
+    },
+    {
+      name: 'image',
+      type: 'relationship',
+      relationTo: 'media',
     },
     {
       name: 'project',
       type: 'relationship',
       relationTo: 'projects',
       required: true,
+      index: true,
     },
   ],
 }

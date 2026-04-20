@@ -4,6 +4,10 @@ export const HeroBlock: Block = {
   slug: 'hero',
   fields: [
     {
+      name: 'order',
+      type: 'number',
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
@@ -13,7 +17,7 @@ export const HeroBlock: Block = {
       type: 'text',
     },
     {
-      name: 'backgroundImage',
+      name: 'image',
       type: 'relationship',
       relationTo: 'media',
     },

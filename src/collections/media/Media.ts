@@ -1,11 +1,13 @@
 import type { CollectionConfig } from 'payload'
 import {
+  buildActiveProjectReadAccess,
+  buildFieldUpdateAccess,
   buildProjectScopedCreateAccessWithAction,
-  buildProjectScopedReadAccess,
   buildProjectScopedUpdateDeleteAccess,
   enforceProjectAccessOnCreate,
   hideCollectionWithoutReadPermission,
 } from '@/utils/access/rbac'
+import { attachProject } from '@/hooks/attachProject'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -13,13 +15,13 @@ export const Media: CollectionConfig = {
     hidden: hideCollectionWithoutReadPermission('media'),
   },
   access: {
-    read: buildProjectScopedReadAccess('media', 'project'),
+    read: buildActiveProjectReadAccess(),
     create: buildProjectScopedCreateAccessWithAction('media', 'upload'),
     update: buildProjectScopedUpdateDeleteAccess('media', 'update', 'project'),
     delete: buildProjectScopedUpdateDeleteAccess('media', 'delete', 'project'),
   },
   hooks: {
-    beforeChange: [enforceProjectAccessOnCreate('media', 'upload')],
+    beforeChange: [attachProject, enforceProjectAccessOnCreate('media', 'upload')],
   },
   upload: {
     staticDir: 'media',
@@ -30,12 +32,16 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      access: {
+        update: buildFieldUpdateAccess('media', 'upload'),
+      },
     },
     {
       name: 'project',
       type: 'relationship',
       relationTo: 'projects',
       required: true,
+      index: true,
     },
   ],
 }
